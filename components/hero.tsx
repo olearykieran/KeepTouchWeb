@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import Image from "next/image";
-import { MessageSquareText } from "lucide-react";
-import LogoImage from "../assets/images/icon.png";
 import { saveEmail } from "@/lib/supabase";
+import LogoImage from "../assets/images/icon.png";
+import RotatingHeadline from "./rotating-headline";
 
 export default function Hero() {
   const [email, setEmail] = useState("");
@@ -51,22 +51,19 @@ export default function Hero() {
           <Image
             src={LogoImage}
             alt="KeepTouch Logo"
-            width={100}
-            height={100}
-            className="h-40 w-40"
+            width={80}
+            height={80}
+            priority
+            className="w-20 h-20 object-contain"
           />
         </div>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-800 mb-4 max-w-4xl">
-          Never lose touch with the people who matter
-        </h1>
-        <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl">
-          KeepTouch is your AI relationship assistant that helps you nurture your personal
-          and professional connections.
-        </p>
+
+        {/* Replace static headline with rotating headlines */}
+        <RotatingHeadline />
 
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-md flex flex-col sm:flex-row gap-3"
+          className="w-full max-w-md flex flex-col sm:flex-row gap-3 mt-8"
         >
           <Input
             type="email"

@@ -23,13 +23,14 @@ export async function saveEmail(email: string) {
 }
 
 // Function to save feedback from feedback form
-export async function saveFeedback(feedback: string, email?: string) {
+export async function saveFeedback(feedback: string, email?: string, keptInTouchWith?: string) {
   try {
     const { data, error } = await supabase
       .from('feedback')
       .insert([{ 
         feedback, 
         email, 
+        kept_in_touch_with: keptInTouchWith,
         created_at: new Date().toISOString() 
       }]);
 

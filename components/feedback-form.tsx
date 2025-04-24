@@ -10,6 +10,7 @@ import { saveFeedback } from '@/lib/supabase';
 export default function FeedbackForm() {
   const [feedback, setFeedback] = useState('');
   const [email, setEmail] = useState('');
+  const [keepInTouch, setKeepInTouch] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,11 +21,12 @@ export default function FeedbackForm() {
     
     try {
       // Use the saveFeedback function from Supabase client
-      const result = await saveFeedback(feedback, email || undefined);
+      const result = await saveFeedback(feedback, email || undefined, keepInTouch || undefined);
       
       if (result.success) {
         setFeedback('');
         setEmail('');
+        setKeepInTouch('');
         toast({
           title: "Feedback received!",
           description: "Thank you for sharing your thoughts with us.",
@@ -64,6 +66,21 @@ export default function FeedbackForm() {
             onChange={(e) => setFeedback(e.target.value)}
             required
           />
+          
+          {/* Reflective question input - optional */}
+          <div className="space-y-2">
+            <label htmlFor="keepInTouch" className="block text-sm font-medium text-gray-600 italic">
+              Who is one person you wish you&apos;d kept in better touch with?
+            </label>
+            <Input
+              id="keepInTouch"
+              placeholder="Share if you'd like to (optional)"
+              className="bg-white border-gray-300 rounded-xl"
+              value={keepInTouch}
+              onChange={(e) => setKeepInTouch(e.target.value)}
+            />
+          </div>
+          
           <Input
             type="email"
             placeholder="Your email (optional)"
