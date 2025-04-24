@@ -28,6 +28,10 @@ const satoshi = localFont({
 export const metadata: Metadata = {
   title: 'KeepTouch - AI Relationship Assistant',
   description: 'Your smart assistant that helps you stay in touch with the people you care about.',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
