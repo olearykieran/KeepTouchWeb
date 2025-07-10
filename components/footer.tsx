@@ -20,13 +20,13 @@ export default function Footer() {
           {/* Fixed width spacer that will maintain exact width regardless of screen size */}
           <span className="inline-block w-10 md:w-16 lg:w-24"></span>
 
-          <Link href="#" className="text-gray-600 hover:text-gray-800 text-sm">
+          <Link href="/privacy" className="text-gray-600 hover:text-gray-800 text-sm">
             Privacy Policy
           </Link>
 
           <span className="inline-block w-8 md:w-10"></span>
 
-          <Link href="#" className="text-gray-600 hover:text-gray-800 text-sm">
+          <Link href="/terms" className="text-gray-600 hover:text-gray-800 text-sm">
             Terms of Service
           </Link>
 

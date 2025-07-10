@@ -86,3 +86,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .blur-overlay {
+    @apply backdrop-blur-md backdrop-filter;
+  }
+}
