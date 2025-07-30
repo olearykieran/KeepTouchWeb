@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -20,14 +20,17 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [showConfirmButton, setShowConfirmButton] = useState(false);
+  const [code, setCode] = useState<string | null>(null);
+  const hasAttemptedExchange = useRef(false);
 
   useEffect(() => {
-    handlePasswordReset();
+    checkUrlParams();
   }, [searchParams]);
 
-  const handlePasswordReset = async () => {
+  const checkUrlParams = () => {
     // Get all parameters
-    const code = searchParams.get('code');
+    const urlCode = searchParams.get('code');
     const error = searchParams.get('error');
     const error_code = searchParams.get('error_code');
     const error_description = searchParams.get('error_description');
@@ -39,39 +42,65 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // Handle authorization code
-    if (code) {
-      try {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        
-        if (error) throw error;
-        
-        if (data.session) {
-          setShowForm(true);
-          setLoading(false);
-        } else {
-          throw new Error('Failed to establish session');
-        }
-      } catch (err: any) {
-        console.error('Code exchange error:', err);
-        setError('This password reset link is invalid or has expired. Please request a new one.');
-        setLoading(false);
-      }
+    // If we have a code, show the confirm button instead of auto-exchanging
+    if (urlCode && !hasAttemptedExchange.current) {
+      setCode(urlCode);
+      setShowConfirmButton(true);
+      setLoading(false);
       return;
     }
 
     // Check if user already has a session
+    checkExistingSession();
+  };
+
+  const checkExistingSession = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
         setShowForm(true);
-      } else {
+      } else if (!code) {
         setError('No valid session found. Please request a password reset from the app.');
       }
     } catch (err) {
       console.error('Session check error:', err);
       setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmReset = async () => {
+    if (!code || hasAttemptedExchange.current) return;
+    
+    hasAttemptedExchange.current = true;
+    setLoading(true);
+    setShowConfirmButton(false);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (error) {
+        // If the code is already used, check if we have a session anyway
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setShowForm(true);
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
+      
+      if (data.session) {
+        setShowForm(true);
+      } else {
+        throw new Error('Failed to establish session');
+      }
+    } catch (err: any) {
+      console.error('Code exchange error:', err);
+      setError('This password reset link is invalid or has expired. Please request a new one.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +157,22 @@ export default function ResetPasswordPage() {
           </div>
         )}
 
-        {error && !loading && (
+        {showConfirmButton && !loading && (
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">Confirm Password Reset</h2>
+            <p className="text-gray-600 mb-6">
+              Click the button below to reset your password. This helps prevent automated security systems from invalidating your reset link.
+            </p>
+            <button
+              onClick={handleConfirmReset}
+              className="bg-[#9d9e9e] text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Continue to Reset Password
+            </button>
+          </div>
+        )}
+
+        {error && !loading && !showConfirmButton && (
           <>
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
               {error}
